@@ -10,12 +10,13 @@ public class BCMP_main {
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		int N = 100, K = 12, c = 2;
-		//double mu[][] = {{5,5,10,5,5,5,5,5,5,10,5,10}, {5,5,10,5,5,5,5,5,5,10,5,10}};//サービス率
-		double mu[][] = {{5,5},{5,5},{10,10},{5,5},{5,5},{5,5},{5,5},{5,5},{5,5},{10,10},{5,5},{10,10}};//サービス率
+		int N = 10, K = 12, c = 2;
+		int nc[] = {5,5};//各クラスの最大値
+		double mu[][] = {{5,5,10,5,5,5,5,5,5,10,5,10}, {5,5,10,5,5,5,5,5,5,10,5,10}};//サービス率
+		//double mu[][] = {{5,5},{5,5},{10,10},{5,5},{5,5},{5,5},{5,5},{5,5},{5,5},{10,10},{5,5},{10,10}};//サービス率
 		double [][]r = new double[K * c][K * c];
 		BCMP_main bmain = new BCMP_main();
-		bmain.getCSV2("csv/transition_class.csv", K, c, r);
+		bmain.getCSV2("csv/transition.csv", K, c, r);
 		System.out.println("推移確率行列" +Arrays.deepToString(r));
 		
 		double alpha[] = new double[K * c];//トラフィック方程式の解(α11=1とする)
@@ -46,14 +47,42 @@ public class BCMP_main {
 			else alpha[i] = alpha1[i-1];
 		}
 		System.out.println("トラフィック方程式解α" +Arrays.toString(alpha));
+		double alpha2[][] = {{1.0, 0.9760707373104454, 1.9469520689427025, 0.9502782204518215, 0.9765260877564881, 1.0196937083667734, 1.09062044987315, 1.0166426589311544, 0.9965026346573167, 1.702724752752357, 0.994438760077145, 1.4609981533055358},
+				{1.0, 0.9760707373104454, 1.9469520689427025, 0.9502782204518215, 0.9765260877564881, 1.0196937083667734, 1.09062044987315, 1.0166426589311544, 0.9965026346573167, 1.702724752752357, 0.994438760077145, 1.4609981533055358}
+		};
 		
-		blib.calcAverage(alpha);
-		double T[][] = blib.getT();
-		double lambda[] = blib.getLambda();
-		double L[][] = blib.getL();
-		System.out.println("平均滞在時間" +Arrays.deepToString(T));
-		System.out.println("Throughput" +Arrays.toString(lambda));
-		System.out.println("平均系内人数" +Arrays.deepToString(L));
+		Combination_lib clib = new Combination_lib(N,c);
+		clib.GetRecursive(N,0, -1);
+		int value[][] = clib.getValue();
+		System.out.println("個数N = " +N);
+		System.out.println("クラス数C = " +c);
+		System.out.println("重複組合せ:個数" +value.length);
+		System.out.println("重複組合せ:" +Arrays.deepToString(value));
+		int valuenc[][] = clib.getValueNc(value, nc);
+		System.out.println("制約(最大数):" +Arrays.toString(nc));
+		System.out.println("重複組合せ(制約付き):個数" +valuenc.length);
+		System.out.println("重複組合せ(制約付き):" +Arrays.deepToString(valuenc));
+		
+		MVA_lib mlib = new MVA_lib(c, K, N, nc, mu,alpha2);
+		mlib.getMVA();
+		double L[][][] = mlib.getL();
+		double W[][][][] = mlib.getW();
+		double lambda[][][] = mlib.getLambda();
+		System.out.println("W:" +Arrays.deepToString(W));
+		System.out.println("λ:" +Arrays.deepToString(lambda));
+		System.out.println("L:" +Arrays.deepToString(L));
+		
+		for(int i = 0; i < W.length; i++) {
+			for(int j = 0; j < W[i].length; j++) {
+				System.out.println("W["+i+"]["+j+"]["+nc[0]+"]["+nc[1]+"]= "+W[i][j][nc[0]][nc[1]]);
+			}
+		}
+		for(int i = 0; i < lambda.length; i++) {
+			System.out.println("lambda["+i+"]["+nc[0]+"]["+nc[1]+"]= "+lambda[i][nc[0]][nc[1]]);
+		}
+		for(int i = 0; i < L.length; i++) {
+			System.out.println("L["+i+"]["+nc[0]+"]["+nc[1]+"]= "+L[i][nc[0]][nc[1]]);
+		}
 	}
 
 	public void getCSV2(String path, int K, int c, double r[][]) {
