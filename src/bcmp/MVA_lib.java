@@ -34,10 +34,12 @@ public class MVA_lib {
 					for(int k = 0; k < K; k++) { //ノードのループ
 						if(c == 0) {
 							if(valuenc[s][0] == 0) W[c][k][valuenc[s][0]][valuenc[s][1]] = 1/mu[c][k];
-							else W[c][k][valuenc[s][0]][valuenc[s][1]] = 1/mu[c][k] * ( 1 + L[k][valuenc[s][0]-1][valuenc[s][1]]);
+							else W[c][k][valuenc[s][0]][valuenc[s][1]] = 1/mu[c][k] * alpha[c][k] * ( 1 + L[k][valuenc[s][0]-1][valuenc[s][1]]);
 						}else if(c == 1){
 							if(valuenc[s][1] == 0) W[c][k][valuenc[s][0]][valuenc[s][1]] = 1/mu[c][k];
-							else W[c][k][valuenc[s][0]][valuenc[s][1]] = 1/mu[c][k] * ( 1 + L[k][valuenc[s][0]][valuenc[s][1]-1]);
+							else W[c][k][valuenc[s][0]][valuenc[s][1]] = 1/mu[c][k] * alpha[c][k] * ( 1 + L[k][valuenc[s][0]][valuenc[s][1]-1]);
+							//20191021
+							//Total Service Demand Dck = Vck * Sck(An average service time)
 						}
 					}
 				}// Step2終了
@@ -45,7 +47,8 @@ public class MVA_lib {
 				for(int c = 0; c < C; c++) {
 					double sum = 0;
 					for(int k = 0; k < K; k++) {
-						sum += W[c][k][valuenc[s][0]][valuenc[s][1]] * alpha[c][k]; 
+						//sum += W[c][k][valuenc[s][0]][valuenc[s][1]] * alpha[c][k];
+						sum += W[c][k][valuenc[s][0]][valuenc[s][1]];
 					}
 					lambda[c][valuenc[s][0]][valuenc[s][1]] = nclass[c] / sum;
 				}// Step3終了
