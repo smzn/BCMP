@@ -2,21 +2,13 @@ package bcmp;
 
 public class BCMP_lib {
 
-	private int K,c,NK,N,n1,n2;
-	private double lambda[], L[][], T[][], mu[][],rho[][];
+	private int K,c,NK,N;
 	
 	public BCMP_lib(int k, int c, int n, double mu[][]) {
 		K = k; //ノード数
 		this.c = c; //クラス数
 		this.N = n; //系内人数
 		NK = K * c -1;
-		lambda = new double[c];
-		L = new double[K][c];
-		T = new double[K][c];
-		this.mu = mu;
-		rho = new double[c][K]; //利用率
-		n1 = 60;//クラス別人数
-		n2 = 40;
 	}
 
 	public double [] calcGauss(double[][] a, double[] b){
@@ -68,52 +60,5 @@ public class BCMP_lib {
 		      }
 		
 		return b;
-	}
-	
-	public void calcAverage(double alpha[]){
-		int n = 0;
-		while(n < N){
-			n++;
-			//Step2.1 Mean Response Time(滞在時間)
-			for(int i = 0; i < K; i++){//Kはノード数
-				for(int j = 0; j < c; j++) {//cはクラス数
-					double sum = 0;
-					for(int s = 0; s < c; s++) {//ノードiの全てのクラスのL[i][s]を求める
-						sum += L[i][s]; 
-					}
-					T[i][j] = (sum + 1)/mu[i][j];
-				}
-			}
-						
-			//Step2.2 Throughput
-			for(int i = 0; i < c;i++){
-				double sum = 0;
-				for(int j = 0; j < K; j++) {
-					sum += alpha[i * K + j]*T[j][i];
-				}
-				if(i == 0) lambda[i] = n1/sum; //n1はクラス1の人数
-				else lambda[i] = n2/sum; //n2はクラス2の人数
-			}
-						
-			//Step2.3 系内人数
-			for(int i = 0; i < K; i++){
-				for(int j = 0; j < c; j++) {
-					L[i][j] = lambda[j]*T[i][j]*alpha[i + j * K];
-				}
-			}
-		}
-	}
-
-	public double[][] getT() {
-		return T;
-	}
-
-	public double[] getLambda() {
-		return lambda;
-	}
-
-	public double[][] getL() {
-		return L;
-	}
-
+	}	
 }

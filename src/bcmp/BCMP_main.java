@@ -8,11 +8,17 @@ import java.util.Arrays;
 
 public class BCMP_main {
 
+	//課題1 クラス間移動がない場合、α11=1、α21=1と置かないといけない
+	//今はalpha2として直接取り込んでいる
+	//課題2 クラス数が2で固定
+	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		int N = 10, K = 12, c = 2;
+		int node_index[] = {14,15,17,18,21,24,27,29,31,34};
 		int nc[] = {5,5};//各クラスの最大値
 		double mu[][] = {{5,5,10,5,5,5,5,5,5,10,5,10}, {5,5,10,5,5,5,5,5,5,10,5,10}};//サービス率
+		double mu_sim[] = {5,5,10,5,5,5,5,5,5,10,5,10,5,5,10,5,5,5,5,5,5,10,5,10};//シミュレーション用サービス率
 		//double mu[][] = {{5,5},{5,5},{10,10},{5,5},{5,5},{5,5},{5,5},{5,5},{5,5},{10,10},{5,5},{10,10}};//サービス率
 		double [][]r = new double[K * c][K * c];
 		BCMP_main bmain = new BCMP_main();
@@ -83,6 +89,10 @@ public class BCMP_main {
 		for(int i = 0; i < L.length; i++) {
 			System.out.println("L["+i+"]["+nc[0]+"]["+nc[1]+"]= "+L[i][nc[0]][nc[1]]);
 		}
+		
+		//Simulation
+		BCMP_Simulation slib = new BCMP_Simulation(r, mu_sim, 1000, node_index, K, N, c);
+		slib.getSimulation();
 	}
 
 	public void getCSV2(String path, int K, int c, double r[][]) {
