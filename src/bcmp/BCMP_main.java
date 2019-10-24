@@ -91,8 +91,9 @@ public class BCMP_main {
 		}
 		
 		//Simulation
-		BCMP_Simulation slib = new BCMP_Simulation(r, mu_sim, 1000, node_index, K, N, c);
-		slib.getSimulation();
+		BCMP_Simulation slib = new BCMP_Simulation(r, mu_sim, 300000, node_index, K, N, c);
+		double [][] result = slib.getSimulation();
+		System.out.println("Result:" +Arrays.deepToString(result));
 	}
 
 	public void getCSV2(String path, int K, int c, double r[][]) {

@@ -46,21 +46,27 @@ public class BCMP_Simulation {
 		this.maxlengthtime = new double[C*K];
 	}
 
-	public void getSimulation() {
+	public double[][] getSimulation() {
 		double service[] = new double[C*K];
 		double result[][] = new double[2][C*K];
 		int queue[] = new int[C*K]; //各ノードのサービス中を含むキューの長さ
 		double elapse = 0;
+		int error = 0;
 		
 		//スタート時に2つのノードに分散
-		for(int i = 0; i < this.N; i++) {
+		for(int i = 0; i < this.N / 2; i++) {
 			//ノード00用
 			event[0].add("arrival");
 			queuelength[0].add(queue[0]);
 			eventtime[0].add(elapse); //(移動時間0)
-			queue[0]++; //最初はノード0にn人いるとする 
+			queue[0]++; //最初はノード0にn人いるとする
+			event[1*K].add("arrival");
+			queuelength[1*K].add(queue[1*K]);
+			eventtime[1*K].add(elapse); //(移動時間0)
+			queue[1*K]++; //最初はノード0にn人いるとする
 		}
 		service[0] = this.getExponential(mu[0]); //先頭客のサービス時間設定
+		service[1*K] = this.getExponential(mu[1*K]); //先頭客のサービス時間設定
 		double total_queue[] = new double[C*K]; //各ノードの延べ系内人数
 		double total_queuelength[] = new double[C*K]; //待ち人数
 		
@@ -82,6 +88,7 @@ public class BCMP_Simulation {
 				else if ( queue[i] == 0 ) total_queuelength[i] += queue[i] * mini_service;
 				timerate[i][queue[i]] += mini_service;
 			}
+			
 			//各ノードでの人数割合(同時滞在人数) 
 			for(int i = 0; i < N+1; i++) { //0人からn人までのn+1
 				int totalnumber = 0;
@@ -119,7 +126,23 @@ public class BCMP_Simulation {
 					break;
 				}
 			}
-			if( destination_index == -1) destination_index = p[0].length -1;
+			/* クラス内の移動を確認
+			System.out.println("From : "+mini_index+" , To : "+destination_index);
+			if(mini_index < K && destination_index < K)
+				System.out.println("Class A");
+			else if(mini_index >= K && destination_index >= K)
+				System.out.println("Class B");
+			else if(destination_index == -1) {
+				System.out.println("Error");
+				error ++;
+			}*/
+				
+			//行先が決まらなかった場合(結構ある)
+			if( destination_index == -1) {
+				if(mini_index < K) destination_index = 0;//クラスの最初のノードにしておく
+				else if (mini_index >= K )destination_index = K;
+				//destination_index = p[0].length -1;
+			}
 			event[destination_index].add("arrival");
 			queuelength[destination_index].add(queue[destination_index]);
 			eventtime[destination_index].add(elapse); //(移動時間0)
@@ -131,7 +154,9 @@ public class BCMP_Simulation {
 			result[0][i] = total_queue[i] / time; //平均系内人数
 			result[1][i] = total_queuelength[i] / time; //平均待ち人数
 		}
-		System.out.println("Result:" +Arrays.deepToString(result));
+		System.out.println("Error = "+error);
+		return result;
+		//System.out.println("Result:" +Arrays.deepToString(result));
 	}
 	
 	//指数乱数発生
