@@ -3,12 +3,17 @@ package bcmp;
 public class BCMP_lib {
 
 	private int K,c,NK,N;
+	double r1[][], b1[], alpha[], alpha_class[][];//alphaは１次元、alpha_classはクラス別の2次元
 	
 	public BCMP_lib(int k, int c, int n, double mu[][]) {
 		K = k; //ノード数
 		this.c = c; //クラス数
 		this.N = n; //系内人数
 		NK = K * c -1;
+		r1 = new double[K * c -1][K * c -1];//Rを転置して対角要素を-1、１行と１列要素を削除
+		b1 = new double[K * c -1]; //Rの１行目の2列目要素からK*c要素まで
+		alpha = new double[K * c];
+		alpha_class = new double[c][K];
 	}
 
 	public double [] calcGauss(double[][] a, double[] b){
@@ -60,5 +65,53 @@ public class BCMP_lib {
 		      }
 		
 		return b;
-	}	
+	}
+	
+	//トラフィック方程式を解く準備
+	public void getPretrafiic(double [][]r) { 
+		for(int i = 0; i < r.length -1; i++){
+			for(int j = 0; j < r.length -1; j++){
+				if( i == j ) {
+					r1[i][j] = r[j + 1][i + 1] - 1;//転置して、対角要素は-1(１行、一列の各要素は除く) 
+				}else {
+					r1[i][j] = r[j + 1][i + 1];
+				}
+			}
+		}
+		for(int i = 0;i < r.length -1; i++){
+			b1[i] = -r[0][i+1];
+		}
+	}
+
+	public double[][] getR1() {
+		return r1;
+	}
+
+	public double[] getB1() {
+		return b1;
+	}
+	
+	//alpha1にα11を追加してalphaとする
+	public void getAlpha_value(double alpha1[]){
+		//alpha作成
+		for(int i = 0 ; i < alpha.length; i++){
+			if( i == 0) alpha[i] = 1;
+			else alpha[i] = alpha1[i-1];
+		}
+		//alpha_class(クラス別２次元に直す)
+		for(int i = 0; i < c; i++) {
+			for(int j = 0; j < K; j++) {
+				alpha_class[i][j] = alpha[i * K + j];
+			}
+		}
+	}
+
+	public double[] getAlpha() {
+		return alpha;
+	}
+
+	public double[][] getAlpha_class() {
+		return alpha_class;
+	}
+	
 }

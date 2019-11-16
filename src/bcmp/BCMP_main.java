@@ -11,25 +11,32 @@ public class BCMP_main {
 	//課題1 クラス間移動がない場合、α11=1、α21=1と置かないといけない
 	//今はalpha2として直接取り込んでいる
 	//課題2 クラス数が2で固定
+	//20191118
+	//シミュレーションを変更してだいぶ値が近くなったがもう少し何とかしたい
+	//クラス間移動を許した時、平均系内人数がL[6]=29->L[6]=27に減少する。
+	//クラス間移動なしと移動あり(クラスだけ変えて、移動予定ノードは変わらない)で各クラスの内容が同じなので、同じ値になるはずだけど、ならない
+	//シミュレーションは同じ値になる
+	//トラフィック方程式の部分が怪しいと思うのでチェックする？
 	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		int N = 10, K = 12, c = 2;
-		int node_index[] = {14,15,17,18,21,24,27,29,31,34};
-		int nc[] = {5,5};//各クラスの最大値
+		int N = 100, K = 12, c = 2;
+		//int node_index[] = {14,15,17,18,21,24,27,29,31,34};
+		int nc[] = {50,50};//各クラスの最大値
 		double mu[][] = {{5,5,10,5,5,5,5,5,5,10,5,10}, {5,5,10,5,5,5,5,5,5,10,5,10}};//サービス率
-		double mu_sim[] = {5,5,10,5,5,5,5,5,5,10,5,10,5,5,10,5,5,5,5,5,5,10,5,10};//シミュレーション用サービス率
-		//double mu[][] = {{5,5},{5,5},{10,10},{5,5},{5,5},{5,5},{5,5},{5,5},{5,5},{10,10},{5,5},{10,10}};//サービス率
+		//double mu_sim[] = {5,5,10,5,5,5,5,5,5,10,5,10,5,5,10,5,5,5,5,5,5,10,5,10};//シミュレーション用サービス率
 		double [][]r = new double[K * c][K * c];
+		double alpha[] = new double[K * c];//トラフィック方程式の解(α11=1とする)
+		double alpha2[][] = new double[c][K];//クラス別2次元配列
+		
+		//(1) 推移確率行列の取り込み
 		BCMP_main bmain = new BCMP_main();
-		bmain.getCSV2("csv/transition.csv", K, c, r);
+		bmain.getCSV2("csv/transition_class.csv", K, c, r);
 		System.out.println("推移確率行列" +Arrays.deepToString(r));
 		
-		double alpha[] = new double[K * c];//トラフィック方程式の解(α11=1とする)
-		//トラフィック方程式を解く準備
-		double alpha1[] = new double[K * c - 1];//トラフィック方程式α
-		double r1[][] = new double[K * c -1][K * c -1];//Rを転置して対角要素を-1、１行と１列要素を削除
-		double b1[] = new double[K * c -1]; //Rの１行目の2列目要素からK*c要素まで
+		
+		
+		/*
 		for(int i = 0; i < r.length -1; i++){
 			for(int j = 0; j < r.length -1; j++){
 				if( i == j ) {
@@ -44,19 +51,44 @@ public class BCMP_main {
 		}
 		System.out.println("計算用行列左辺" +Arrays.deepToString(r1));
 		System.out.println("計算用行列右辺" +Arrays.toString(b1));
+		*/
 		
+		//(2)トラフィック方程式を解く
+		double alpha1[] = new double[K * c - 1];//トラフィック方程式α
+		double r1[][] = new double[K * c -1][K * c -1];//Rを転置して対角要素を-1、１行と１列要素を削除
+		double b1[] = new double[K * c -1]; //Rの１行目の2列目要素からK*c要素まで
 		BCMP_lib blib = new BCMP_lib(K,c,N,mu);
+		blib.getPretrafiic(r);//行列の変形
+		r1 = blib.getR1();
+		b1 = blib.getB1();
 		alpha1 = blib.calcGauss(r1, b1);//トラフィック方程式
+		blib.getAlpha_value(alpha1);//alpha1を元の形に
+		alpha = blib.getAlpha();//alpha1次元
+		alpha2 = blib.getAlpha_class();//alphaクラス別
+		System.out.println("トラフィック方程式解α(クラス別)" +Arrays.deepToString(alpha2));
+		
 		//α11=1としてalphaをalpha1から作る
+		
 		for(int i = 0 ; i < alpha.length; i++){
 			if( i == 0) alpha[i] = 1;
 			else alpha[i] = alpha1[i-1];
 		}
 		System.out.println("トラフィック方程式解α" +Arrays.toString(alpha));
-		double alpha2[][] = {{1.0, 0.9760707373104454, 1.9469520689427025, 0.9502782204518215, 0.9765260877564881, 1.0196937083667734, 1.09062044987315, 1.0166426589311544, 0.9965026346573167, 1.702724752752357, 0.994438760077145, 1.4609981533055358},
-				{1.0, 0.9760707373104454, 1.9469520689427025, 0.9502782204518215, 0.9765260877564881, 1.0196937083667734, 1.09062044987315, 1.0166426589311544, 0.9965026346573167, 1.702724752752357, 0.994438760077145, 1.4609981533055358}
-		};
+		//double alpha2[][] = new double[c][K];
+		for(int i = 0; i < c; i++) {
+			for(int j = 0; j < K; j++) {
+				alpha2[i][j] = alpha[i * K + j];
+			}
+		}
+		//System.out.println("トラフィック方程式解α2" +Arrays.deepToString(alpha2));
 		
+		//double alpha3[][] = {{1.0, 0.9760707373104454, 1.9469520689427025, 0.9502782204518215, 0.9765260877564881, 1.0196937083667734, 1.09062044987315, 1.0166426589311544, 0.9965026346573167, 1.702724752752357, 0.994438760077145, 1.4609981533055358},
+		//		{1.0, 0.9760707373104454, 1.9469520689427025, 0.9502782204518215, 0.9765260877564881, 1.0196937083667734, 1.09062044987315, 1.0166426589311544, 0.9965026346573167, 1.702724752752357, 0.994438760077145, 1.4609981533055358}
+		//};
+		
+		
+		//組み合わせ計算の階乗をやらない計算をする(Nを大きくできるように)
+		//http://slpr.sakura.ne.jp/qp/large-number/
 		Combination_lib clib = new Combination_lib(N,c);
 		clib.GetRecursive(N,0, -1);
 		int value[][] = clib.getValue();
@@ -76,7 +108,7 @@ public class BCMP_main {
 		double lambda[][][] = mlib.getLambda();
 		System.out.println("W:" +Arrays.deepToString(W));
 		System.out.println("λ:" +Arrays.deepToString(lambda));
-		System.out.println("L:" +Arrays.deepToString(L));
+		System.out.println("L[6]:" +Arrays.deepToString(L[6]));
 		
 		for(int i = 0; i < W.length; i++) {
 			for(int j = 0; j < W[i].length; j++) {
@@ -91,7 +123,7 @@ public class BCMP_main {
 		}
 		
 		//Simulation
-		BCMP_Simulation slib = new BCMP_Simulation(r, mu_sim, 300000, node_index, K, N, c);
+		BCMP_Simulation slib = new BCMP_Simulation(r, mu, 300000, K, N, c);
 		double [][] result = slib.getSimulation();
 		System.out.println("Result:" +Arrays.deepToString(result));
 	}

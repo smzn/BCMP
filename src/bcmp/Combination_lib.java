@@ -9,8 +9,50 @@ public class Combination_lib {
 		this.n = n;
 		this.c = c;
 		//重複組合せの個数：cHn = c+n-1Cn = (c+n-1)!/(n!*(c-1)!)
-		combi = this.factorial(n + c - 1) / (this.factorial(n) * this.factorial(c - 1));
+		//combi = this.factorial(n + c - 1) / (this.factorial(n) * this.factorial(c - 1));
+		//combi = this.getCombi_number2(c + n - 1, n);
+		combi = this.getCombi_number3();
 		value = new int[combi][c];
+	}
+	
+	/*
+	public int getCombi_number(int n, int r) {
+		int sum1 = 0, sum2 = 0;
+		for(int i = n - r + 1; i <= n; i++) {
+			sum1 += Math.log(i);
+		}
+		for(int i = 2; i <= r; i++) {
+			sum2 += Math.log(i);
+		}
+		double value = Math.exp(sum1 - sum2);
+		System.out.println("対数重複組み合わせ" + value);
+		return (int) Math.round(Math.exp(sum1 - sum2));
+	}
+	*/
+	
+	public int getCombi_number3() {
+		int N = n + c - 1;
+		int R = n;
+		double sum1 = 0.0;
+		double sum2 = 0.0;
+		for (int i = N - R + 1; i <= N; i++) {
+			sum1 += Math.log(i);
+		}
+		for (int i = 2; i <= R; i++) {
+			sum2 += Math.log(i);
+		}
+		double S = Math.exp(sum1 - sum2);
+		// System.out.println(Math.round(S));
+		return (int) Math.round(S);
+	}
+	
+	public int getCombi_number2(int n, int r) {
+		double sum = 1;
+		for(int i = 1; i <= r; i++) {
+			sum *= (n-r+i);
+			sum /= i;
+		}
+		return (int) Math.round(sum);
 	}
 	
 	public int factorial(int n){
