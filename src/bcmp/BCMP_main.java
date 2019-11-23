@@ -25,16 +25,19 @@ public class BCMP_main {
 	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		int N = 100, K = 12, c = 2;
+		int N = 100, K = 24, c = 2;
 		int nc[] = {50,50};//各クラスの最大値
-		double mu[][] = {{5,5,10,5,5,5,7,5,5,10,5,10}, {5,5,10,5,5,5,7,5,5,10,5,10}};//サービス率
+		//12拠点
+		//double mu[][] = {{5,5,10,5,5,5,7,5,5,10,5,10}, {5,5,10,5,5,5,7,5,5,10,5,10}};//サービス率
+		//24拠点
+		double mu[][] = {{5,5,10,5,5,5,7,5,5,10,5,10,5,5,10,5,5,5,7,5,5,10,5,10}, {5,5,10,5,5,5,7,5,5,10,5,10,5,5,10,5,5,5,7,5,5,10,5,10}};
 		double [][]r = new double[K * c][K * c];
 		double alpha[] = new double[K * c];//トラフィック方程式の解(α11=1とする)
 		double alpha2[][] = new double[c][K];//クラス別2次元配列
 		
 		//(1) 推移確率行列の取り込み
 		BCMP_main bmain = new BCMP_main();
-		bmain.getCSV2("csv/transition_class.csv", K, c, r);
+		bmain.getCSV2("csv/transition2_24.csv", K, c, r);
 		System.out.println("推移確率行列" +Arrays.deepToString(r));
 		
 		//(2)トラフィック方程式を解く
@@ -120,8 +123,8 @@ public class BCMP_main {
 		//(5) DBへ格納
 		int combination_id = 2, transition_id = 1;
 		MySQL mysql = new MySQL(combination_id, transition_id);
-		mysql.insertL(L_node);
-		mysql.insertSimulationL(result[0], time);
+		//mysql.insertL(L_node);
+		//mysql.insertSimulationL(result[0], time);
 	}
 
 	public void getCSV2(String path, int K, int c, double r[][]) {
