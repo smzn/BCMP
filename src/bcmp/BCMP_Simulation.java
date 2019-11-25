@@ -62,8 +62,10 @@ public class BCMP_Simulation {
 			//queuelength[0].add(queue[0]);
 			//eventtime[0].add(elapse); //(移動時間0)
 			queue[0]++; //最初はノード0にn人いるとする
-			if(i%2 == 0) customer[0].add(0); //クラス0として追加
-			if(i%2 == 1) customer[0].add(1); //クラス1として追加
+			//C=3の場合
+			if(i%C == 0) customer[0].add(0); //クラス0として追加
+			if(i%C == 1) customer[0].add(1); //クラス1として追加
+			if(i%C == 2) customer[0].add(2);
 			//event[1*K].add("arrival");
 			//queuelength[1*K].add(queue[1*K]);
 			//eventtime[1*K].add(elapse); //(移動時間0)

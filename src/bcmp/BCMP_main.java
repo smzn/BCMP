@@ -25,19 +25,23 @@ public class BCMP_main {
 	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		int N = 100, K = 24, c = 2;
-		int nc[] = {50,50};//各クラスの最大値
-		//12拠点
+		int N = 100, K = 12, c = 3;
+		//C=2の場合
+		//int nc[] = {50,50};//各クラスの最大値
+		int nc[] = {33,33,34};//各クラスの最大値
+		//12拠点、クラス2
 		//double mu[][] = {{5,5,10,5,5,5,7,5,5,10,5,10}, {5,5,10,5,5,5,7,5,5,10,5,10}};//サービス率
-		//24拠点
-		double mu[][] = {{5,5,10,5,5,5,7,5,5,10,5,10,5,5,10,5,5,5,7,5,5,10,5,10}, {5,5,10,5,5,5,7,5,5,10,5,10,5,5,10,5,5,5,7,5,5,10,5,10}};
+		//12拠点、クラス3
+		double mu[][] = {{5,5,10,5,5,5,7,5,5,10,5,10}, {5,5,10,5,5,5,7,5,5,10,5,10},{5,5,10,5,5,5,7,5,5,10,5,10}};//サービス率
+		//24拠点、クラス3
+		//double mu[][] = {{5,5,10,5,5,5,7,5,5,10,5,10,5,5,10,5,5,5,7,5,5,10,5,10}, {5,5,10,5,5,5,7,5,5,10,5,10,5,5,10,5,5,5,7,5,5,10,5,10},{5,5,10,5,5,5,7,5,5,10,5,10,5,5,10,5,5,5,7,5,5,10,5,10}};
 		double [][]r = new double[K * c][K * c];
 		double alpha[] = new double[K * c];//トラフィック方程式の解(α11=1とする)
 		double alpha2[][] = new double[c][K];//クラス別2次元配列
 		
 		//(1) 推移確率行列の取り込み
 		BCMP_main bmain = new BCMP_main();
-		bmain.getCSV2("csv/transition2_24.csv", K, c, r);
+		bmain.getCSV2("csv/transition4_12_3.csv", K, c, r);
 		System.out.println("推移確率行列" +Arrays.deepToString(r));
 		
 		//(2)トラフィック方程式を解く
@@ -66,7 +70,7 @@ public class BCMP_main {
 				alpha2[i][j] = alpha[i * K + j];
 			}
 		}
-		//System.out.println("トラフィック方程式解α2" +Arrays.deepToString(alpha2));
+		System.out.println("トラフィック方程式解α2" +Arrays.deepToString(alpha2));
 		/*
 		double alpha3[][] = {{1.0, 0.9760707373104454, 1.9469520689427025, 0.9502782204518215, 0.9765260877564881, 1.0196937083667734, 1.09062044987315, 1.0166426589311544, 0.9965026346573167, 1.702724752752357, 0.994438760077145, 1.4609981533055358},
 				{1.0, 0.9760707373104454, 1.9469520689427025, 0.9502782204518215, 0.9765260877564881, 1.0196937083667734, 1.09062044987315, 1.0166426589311544, 0.9965026346573167, 1.702724752752357, 0.994438760077145, 1.4609981533055358}
@@ -92,14 +96,15 @@ public class BCMP_main {
 		//(3) MVAでの計算
 		MVA_lib mlib = new MVA_lib(c, K, N, nc, mu,alpha2);
 		mlib.getMVA();
-		double L[][][] = mlib.getL();
-		double W[][][][] = mlib.getW();
-		double lambda[][][] = mlib.getLambda();
+		double L[][][][] = mlib.getL();
+		double W[][][][][] = mlib.getW();
+		double lambda[][][][] = mlib.getLambda();
 		double L_node[] = new double[K];//平均系内人数最終結果
-		System.out.println("W:" +Arrays.deepToString(W));
-		System.out.println("λ:" +Arrays.deepToString(lambda));
-		System.out.println("L[6]:" +Arrays.deepToString(L[6]));
+		//System.out.println("W:" +Arrays.deepToString(W));
+		//System.out.println("λ:" +Arrays.deepToString(lambda));
+		//System.out.println("L[6]:" +Arrays.deepToString(L[6]));
 		
+		/*
 		for(int i = 0; i < W.length; i++) {
 			for(int j = 0; j < W[i].length; j++) {
 				System.out.println("W["+i+"]["+j+"]["+nc[0]+"]["+nc[1]+"]= "+W[i][j][nc[0]][nc[1]]);
@@ -108,11 +113,18 @@ public class BCMP_main {
 		for(int i = 0; i < lambda.length; i++) {
 			System.out.println("lambda["+i+"]["+nc[0]+"]["+nc[1]+"]= "+lambda[i][nc[0]][nc[1]]);
 		}
+		*/
+		/*C=2の場合
 		for(int i = 0; i < L.length; i++) {
 			System.out.println("L["+i+"]["+nc[0]+"]["+nc[1]+"]= "+L[i][nc[0]][nc[1]]);
 			L_node[i] = L[i][nc[0]][nc[1]];
 		}
-		
+		*/
+		//C=3の場合
+		for(int i = 0; i < L.length; i++) {
+			System.out.println("L["+i+"]["+nc[0]+"]["+nc[1]+"]["+nc[2]+"]= "+L[i][nc[0]][nc[1]][nc[2]]);
+			L_node[i] = L[i][nc[0]][nc[1]][nc[2]];
+		}
 		//(4) Simulation
 		int time = 300000;
 		BCMP_Simulation slib = new BCMP_Simulation(r, mu, time, K, N, c);
